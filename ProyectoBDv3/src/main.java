@@ -1,4 +1,6 @@
 
+import Conector.Conector;
+import Vistas.LoginController;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -8,13 +10,15 @@ import javafx.stage.Stage;
 
 /**
  *
- * @author Alejo
+ * @author Kevin
  */
 public class main extends Application {
 
     @Override
     public void start(Stage ventana) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/vistas/Login.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Vistas/Login.fxml"));
+        Parent root = loader.load();
+        
         Scene scene = new Scene(root);
         ventana.setScene(scene);
         
@@ -26,4 +30,3 @@ public class main extends Application {
         launch(args);
     }
 }
-    
