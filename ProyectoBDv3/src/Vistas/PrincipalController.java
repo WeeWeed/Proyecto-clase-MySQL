@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Optional;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -23,10 +22,16 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.GridPane;
 
 /**
  * FXML Controller class
@@ -58,6 +63,12 @@ public class PrincipalController implements Initializable {
 
     @FXML
     private Button btnNuevaBase;
+
+    @FXML
+    private Button btnEliminarBase;
+    
+    @FXML
+    private Button btnNuevaTabla;
 
     private Conector conector;
 
@@ -101,7 +112,7 @@ public class PrincipalController implements Initializable {
                         Statement statement = connection.createStatement();
                         String sql = "CREATE DATABASE " + nombreBaseDatos;
                         statement.executeUpdate(sql);
-                        
+
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Nueva Base de Datos");
                         alert.setHeaderText("La base de datos se creó exitosamente.");
@@ -135,6 +146,186 @@ public class PrincipalController implements Initializable {
         alert.showAndWait();
     }
 
+    @FXML
+    private void eliminarTabla() {
+        String nombreTabla = tablaTablas.getSelectionModel().getSelectedItem();
+        if (nombreTabla != null) {
+            try {
+                Connection connection = conector.getConnection();
+                if (connection != null) {
+                    // Preparar la sentencia SQL para eliminar la tabla
+                    String sql = "DROP TABLE " + nombreTabla;
+                    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                    preparedStatement.executeUpdate();
+
+                    // Actualizar la lista de tablas después de eliminar
+                    mostrarTablas();
+
+                    // Mostrar un mensaje de éxito
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Eliminación completa");
+                    alert.setHeaderText("La tabla se eliminó exitosamente.");
+                    alert.setContentText("Nombre: " + nombreTabla);
+                    alert.showAndWait();
+                } else {
+                    mostrarAlertaError("No se pudo establecer la conexión");
+                }
+            } catch (SQLException e) {
+                mostrarAlertaError(e.getMessage());
+            }
+        } else {
+            mostrarAlertaAdvertencia("No ha seleccionado una tabla", "Seleccione una tabla para eliminar");
+        }
+    }
+
+    /* Inicio crear tabla*/
+    
+
+    @FXML
+    private void nuevaTabla() {
+        String nombreTabla = mostrarDialogoNombreTabla();
+        if (nombreTabla != null) {
+            int cantidadColumnas = mostrarDialogoCantidadColumnas();
+            if (cantidadColumnas > 0) {
+                List<Columna> columnas = mostrarDialogoDetallesColumnas(cantidadColumnas);
+                if (!columnas.isEmpty()) {
+                    try {
+                        Connection connection = conector.getConnection();
+                        if (connection != null) {
+                            // Preparar la sentencia SQL para crear la nueva tabla
+                            String crear = "CREATE TABLE " + nombreTabla + " (";
+                            for (int i = 0; i < columnas.size(); i++) {
+                                Columna columna = columnas.get(i);
+                                crear = crear + columna.getNombre() + " " + columna.getTipo();
+                                if (i < columnas.size() - 1) {
+                                    crear = crear + ", ";
+                                }
+                            }
+                            crear = crear + ")";
+                            System.out.println(crear);
+                            
+                            Statement Statement = connection.createStatement();
+                            connection.createStatement().executeUpdate("USE " + baseActual);
+                            Statement.executeUpdate(crear);
+
+                            // Actualizar la lista de tablas después de crear la nueva tabla
+                            mostrarTablas();
+
+                            // Mostrar un mensaje de éxito
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Creación completa");
+                            alert.setHeaderText("La tabla se creó correctamente");
+                            alert.setContentText("Nombre: " + nombreTabla);
+                            alert.showAndWait();                            
+                        } else {
+                            mostrarAlertaError("No se pudo establecer la conexión");
+                        }
+                    } catch (SQLException e) {
+                        mostrarAlertaError(e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    private String mostrarDialogoNombreTabla() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nueva Tabla");
+        dialog.setHeaderText("Ingrese el nombre de la nueva tabla");
+        dialog.setContentText("Nombre:");
+
+        Optional<String> resultado = dialog.showAndWait();
+        return resultado.orElse(null);
+    }
+
+    private int mostrarDialogoCantidadColumnas() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nueva Tabla");
+        dialog.setHeaderText("Ingrese la cantidad de columnas");
+        dialog.setContentText("Cantidad:");
+
+        Optional<String> resultado = dialog.showAndWait();
+        if (resultado.isPresent()) {
+            try {
+                return Integer.parseInt(resultado.get());
+            } catch (NumberFormatException e) {
+                // El valor ingresado no es un número válido
+                mostrarAlertaError("Ingrese un valor numérico válido");
+            }
+        }
+        return 0;
+    }
+
+    private List<Columna> mostrarDialogoDetallesColumnas(int cantidadColumnas) {
+        List<Columna> columnas = new ArrayList<>();
+
+        for (int i = 0; i < cantidadColumnas; i++) {
+            Dialog<Columna> dialog = new Dialog<>();
+            dialog.setTitle("Nueva Tabla");
+            dialog.setHeaderText("Ingrese los detalles de la columna " + (i + 1));
+
+            ButtonType crearButton = new ButtonType("Crear", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(crearButton, ButtonType.CANCEL);
+
+            GridPane gridPane = new GridPane();
+            gridPane.setHgap(10);
+            gridPane.setVgap(10);
+
+            TextField nombreField = new TextField();
+            ComboBox<String> tipoComboBox = new ComboBox<>();
+            tipoComboBox.getItems().addAll("VARCHAR(30)", "INTEGER", "BOOLEAN", "FLOAT", "DOUBLE");
+
+            gridPane.add(new Label("Nombre:"), 0, 0);
+            gridPane.add(nombreField, 1, 0);
+            gridPane.add(new Label("Tipo:"), 0, 1);
+            gridPane.add(tipoComboBox, 1, 1);
+
+            dialog.getDialogPane().setContent(gridPane);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == crearButton) {
+                    String nombre = nombreField.getText();
+                    String tipo = tipoComboBox.getValue();
+
+                    if (nombre.isEmpty() || tipo == null) {
+                        mostrarAlertaError("Ingrese todos los detalles de la columna");
+                        return null;
+                    }
+
+                    return new Columna(nombre, tipo);
+                }
+                return null;
+            });
+
+            Optional<Columna> resultado = dialog.showAndWait();
+            resultado.ifPresent(columnas::add);
+        }
+
+        return columnas;
+    }
+
+    private static class Columna {
+
+        private final String nombre;
+        private final String tipo;
+
+        public Columna(String nombre, String tipo) {
+            this.nombre = nombre;
+            this.tipo = tipo;
+        }
+
+        public String getNombre() {
+            return nombre;
+        }
+
+        public String getTipo() {
+            return tipo;
+        }
+    }
+    /*Fin crear tabla*/
+    
+    
     @FXML
     private void mostrarRegistros() throws SQLException {
         String nombreTabla = tablaTablas.getSelectionModel().getSelectedItem();
@@ -260,6 +451,48 @@ public class PrincipalController implements Initializable {
             alert.setContentText(e.getMessage());
             alert.show();
             System.out.println("El objeto conector no ha sido configurado correctamente.");
+        }
+    }
+
+    @FXML
+    private void eliminarBaseDatos() {
+        String baseDatosSeleccionada = tablaBases.getSelectionModel().getSelectedItem();
+        if (baseDatosSeleccionada != null) {
+            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmacion.setTitle("Confirmar eliminación");
+            confirmacion.setHeaderText("Eliminar base de datos");
+            confirmacion.setContentText("¿Estás seguro de que quieres eliminar la base de datos '" + baseDatosSeleccionada + "'?");
+            Optional<ButtonType> resultado = confirmacion.showAndWait();
+
+            if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+                try {
+                    Connection connection = conector.getConnection();
+                    if (connection != null) {
+                        Statement statement = connection.createStatement();
+                        String sql = "DROP DATABASE " + baseDatosSeleccionada;
+                        statement.executeUpdate(sql);
+
+                        // Eliminar la base de datos de la lista
+                        tablaBases.getItems().remove(baseDatosSeleccionada);
+
+                        // Mostrar una alerta de éxito
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Base de Datos Eliminada");
+                        alert.setHeaderText("La base de datos se eliminó exitosamente.");
+                        alert.setContentText("Nombre: " + baseDatosSeleccionada);
+                        alert.showAndWait();
+                        if (lblBase.getText() == baseDatosSeleccionada) {
+                            lblBase.setText("Ninguna");
+                        }
+                    } else {
+                        mostrarAlertaError("No se pudo establecer la conexión");
+                    }
+                } catch (SQLException e) {
+                    mostrarAlertaError(e.getMessage());
+                }
+            }
+        } else {
+            mostrarAlertaAdvertencia("Selección de Base de Datos", "Seleccione una base de datos para eliminar.");
         }
     }
 

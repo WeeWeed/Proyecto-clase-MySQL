@@ -93,6 +93,7 @@ public class LoginController implements Initializable {
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
+            stage.setTitle("Gestor de Bases de Datos");
         } catch (IOException e) {
             e.printStackTrace();
         }
