@@ -21,10 +21,10 @@
       <TableView fx:id="tablaRegistros" layoutX="69.0" layoutY="274.0" prefHeight="425.0" prefWidth="757.0" />
       <Button fx:id="btnCargarBases" layoutX="62.0" layoutY="76.0" mnemonicParsing="false" onAction="#cargarBasesDeDatos" text="Cargar bases de datos" />
       <Button fx:id="btnMostrarTablas" layoutX="86.0" layoutY="175.0" mnemonicParsing="false" onAction="#mostrarTablas" text="Cargar tablas" />
+      <Button fx:id="btnNuevaBase" layoutX="51.0" layoutY="218.0" mnemonicParsing="false" onAction="#crearNuevaBase" text="Crear nueva base de datos" />
       <Button fx:id="btnUsarBase" layoutX="301.0" layoutY="230.0" mnemonicParsing="false" onAction="#usarBase" text="Usar base de datos" />
       <Button fx:id="btnMostrarRegistros" layoutX="584.0" layoutY="230.0" mnemonicParsing="false" onAction="#mostrarRegistros" text="Cargar registros" />
       <Button layoutX="911.0" layoutY="335.0" mnemonicParsing="false" text="Crear nuevo registro" />
-      <Button layoutX="921.0" layoutY="445.0" mnemonicParsing="false" text="Crear nuevo" />
       <TableView fx:id="tablaBases" layoutX="245.0" layoutY="60.0" prefHeight="150.0" prefWidth="228.0" />
       <Label layoutX="62.0" layoutY="115.0" text="Base de Datos actual:">
          <font>

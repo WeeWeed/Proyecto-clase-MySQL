@@ -9,10 +9,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -21,10 +24,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.util.Callback;
+import javafx.scene.control.TextInputDialog;
 
 /**
  * FXML Controller class
@@ -47,17 +49,20 @@ public class PrincipalController implements Initializable {
 
     @FXML
     private Button btnMostrarTablas;
-    
+
     @FXML
     private Label lblBase;
-    
+
     @FXML
     private Button btnUsarBase;
 
+    @FXML
+    private Button btnNuevaBase;
+
     private Conector conector;
-    
+
     private String baseActual;
-    
+
     @FXML
     private Button btnMostrarRegistros;
 
@@ -75,21 +80,69 @@ public class PrincipalController implements Initializable {
         tablaTablas.getColumns().add(tablasColumn);
     }
 
-    @FXML 
-    private void usarBase(){
+    @FXML
+    private void usarBase() {
         baseActual = tablaBases.getSelectionModel().getSelectedItem();
         lblBase.setText(baseActual);
     }
 
     @FXML
+    private void crearNuevaBase() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nueva Base de Datos");
+        dialog.setHeaderText("Ingrese el nombre de la base de datos");
+        dialog.setContentText("Nombre:");
+
+        dialog.showAndWait().ifPresent(nombreBaseDatos -> {
+            if (!nombreBaseDatos.trim().isEmpty()) {
+                try {
+                    Connection connection = conector.getConnection();
+                    if (connection != null) {
+                        Statement statement = connection.createStatement();
+                        String sql = "CREATE DATABASE " + nombreBaseDatos;
+                        statement.executeUpdate(sql);
+                        
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Nueva Base de Datos");
+                        alert.setHeaderText("La base de datos se creó exitosamente.");
+                        alert.setContentText("Nombre: " + nombreBaseDatos);
+                        alert.showAndWait();
+                        cargarBasesDeDatos();
+                    } else {
+                        mostrarAlertaError("No se pudo establecer la conexión");
+                    }
+                } catch (SQLException e) {
+                    mostrarAlertaError(e.getMessage());
+                }
+            } else {
+                mostrarAlertaAdvertencia("Nombre de base de datos inválido", "Debe ingresar un nombre de base de datos válido.");
+            }
+        });
+    }
+
+    private void mostrarAlertaError(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setContentText("mensaje");
+        alert.showAndWait();
+    }
+
+    private void mostrarAlertaAdvertencia(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Advertencia");
+        alert.setHeaderText(titulo);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    @FXML
     private void mostrarRegistros() throws SQLException {
-        String nombreTabla = tablaTablas.getSelectionModel().getSelectedItem();        
+        String nombreTabla = tablaTablas.getSelectionModel().getSelectedItem();
         if (nombreTabla != null) {
-            Connection connection = conector.getConnection(); // Manejo del error de SQL
+            Connection connection = conector.getConnection();
             if (connection != null) {
                 // Obtener los registros de la tabla
                 List<Map<String, Object>> registros = obtenerRegistros(baseActual, nombreTabla);
-                // Aquí reemplaza "nombre_base_datos" con el nombre real de la base de datos
 
                 // Crear una lista observable para los registros
                 ObservableList<Map<String, Object>> registrosObservable = FXCollections.observableArrayList(registros);
@@ -108,17 +161,11 @@ public class PrincipalController implements Initializable {
                 tablaRegistros.setItems(registrosObservable);
             } else {
                 // Manejo del error de conexión
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setContentText("No se pudo establecer la conexión");
-                alert.show();
+                mostrarAlertaError("No se pudo establecer la conexión");
             }
         } else {
             // No se ha seleccionado ninguna tabla
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Advertencia");
-            alert.setContentText("Seleccione una tabla primero");
-            alert.show();
+            mostrarAlertaAdvertencia("No se ha seleccionado una tabla", "Seleccione una tabla primero");
         }
     }
 
@@ -149,7 +196,7 @@ public class PrincipalController implements Initializable {
     }
 
     @FXML
-    private void mostrarTablas() {      
+    private void mostrarTablas() {
         if (baseActual != null) {
             try {
                 Connection connection = conector.getConnection();
