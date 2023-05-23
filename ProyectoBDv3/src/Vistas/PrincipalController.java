@@ -26,9 +26,15 @@ public class PrincipalController implements Initializable {
 
     @FXML
     private TableView<String> tablaBases;
+    
+    @FXML
+    private TableView<String> tablaTablas;
 
     @FXML
     private Button btnCargarBases;
+
+    @FXML
+    private Button btnMostrarTablas;
 
     private Conector conector;
 
@@ -38,9 +44,52 @@ public class PrincipalController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        TableColumn<String, String> column = new TableColumn<>("Bases de datos");
-        column.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
-        tablaBases.getColumns().add(column);
+        TableColumn<String, String> basesColumn = new TableColumn<>("Bases de datos");
+        basesColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
+        tablaBases.getColumns().add(basesColumn);
+        TableColumn<String, String> tablasColumn = new TableColumn<>("Tablas");
+        tablasColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
+        tablaTablas.getColumns().add(tablasColumn);
+    }
+
+    @FXML
+    private void mostrarTablas() {
+        String nombreBaseDatos = tablaBases.getSelectionModel().getSelectedItem();
+        if (nombreBaseDatos != null) {
+            try {
+                Connection connection = conector.getConnection();
+                if (connection != null) {
+                    PreparedStatement preparedStatement = connection.prepareStatement("SHOW TABLES IN " + nombreBaseDatos);
+                    ResultSet resultSet = preparedStatement.executeQuery();
+
+                    ObservableList<String> tablas = FXCollections.observableArrayList();
+                    while (resultSet.next()) {
+                        String nombreTabla = resultSet.getString(1);
+                        tablas.add(nombreTabla);
+                        System.out.println(nombreTabla);
+                    }
+                    
+                    tablaTablas.setItems(tablas);
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setContentText("No se pudo establecer la conexión");
+                    alert.show();
+                }
+            } catch (SQLException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setContentText(e.getMessage());
+                alert.show();
+                System.out.println("El objeto conector no ha sido configurado correctamente.");
+            }
+        } else {
+            // No se ha seleccionado ninguna base de datos
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Advertencia");
+            alert.setContentText("Seleccione una base de datos primero");
+            alert.show();
+        }
     }
 
     @FXML

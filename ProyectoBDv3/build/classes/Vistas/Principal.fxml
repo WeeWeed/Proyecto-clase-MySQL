@@ -7,29 +7,39 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
-<?import javafx.beans.property.SimpleStringProperty?>
-
 
 <AnchorPane id="AnchorPane" prefHeight="720.0" prefWidth="1080.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Vistas.PrincipalController">
     <stylesheets>
         <URL value="@principal.css" />
     </stylesheets>
    <children>
+      <TableView fx:id="tablaTablas" layoutX="520.0" layoutY="60.0" prefHeight="150.0" prefWidth="228.0" />
       <Label layoutX="421.0" layoutY="21.0" text="Gestor de Base de Datos">
          <font>
             <Font size="22.0" />
          </font>
       </Label>
-      <TableView layoutX="68.0" layoutY="239.0" prefHeight="425.0" prefWidth="757.0">
+      <TableView layoutX="69.0" layoutY="274.0" prefHeight="425.0" prefWidth="757.0">
         <columns>
           <TableColumn prefWidth="75.0" text="C1" />
           <TableColumn prefWidth="75.0" text="C2" />
         </columns>
       </TableView>
+      <Button fx:id="btnCargarBases" layoutX="62.0" layoutY="76.0" mnemonicParsing="false" onAction="#cargarBasesDeDatos" text="Cargar bases de datos" />
       <Button layoutX="911.0" layoutY="309.0" mnemonicParsing="false" text="Crear nuevo registro" />
       <Button layoutX="902.0" layoutY="379.0" mnemonicParsing="false" text="Crear nuevo" />
       <Button layoutX="921.0" layoutY="445.0" mnemonicParsing="false" text="Crear nuevo" />
-      <Button fx:id="btnCargarBases" layoutX="129.0" layoutY="25.0" mnemonicParsing="false" onAction="#cargarBasesDeDatos" text="Cargar bases de datos" />
-      <TableView fx:id="tablaBases" layoutX="82.0" layoutY="60.0" prefHeight="150.0" prefWidth="228.0" />
+      <TableView fx:id="tablaBases" layoutX="245.0" layoutY="60.0" prefHeight="150.0" prefWidth="228.0" />
+      <Label layoutX="64.0" layoutY="135.0" text="Base de Datos actual:">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="103.0" layoutY="162.0" text="Ninguna">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Button fx:id="btnMostrarTablas" layoutX="86.0" layoutY="198.0" mnemonicParsing="false" onAction="#mostrarTablas" text="Cargar tablas" />
    </children>
 </AnchorPane>
