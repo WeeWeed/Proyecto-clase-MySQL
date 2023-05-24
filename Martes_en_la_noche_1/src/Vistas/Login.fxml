@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Vistas.LoginController">
+    <stylesheets>
+        <URL value="@login.css" />
+    </stylesheets>
+   <children>
+      <TextField fx:id="txtURL" layoutX="300.0" layoutY="104.0" text="localhost">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="txtPuerto" layoutX="300.0" layoutY="151.0" text="3306">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="txtUsuario" layoutX="300.0" layoutY="200.0" text="test">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <PasswordField fx:id="txtContraseña" layoutX="300.0" layoutY="248.0" text="12345">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </PasswordField>
+      <Button fx:id="btnConectar" layoutX="252.0" layoutY="326.0" mnemonicParsing="false" onAction="#conectar" text="Conectar">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Button>
+      <Label layoutX="263.0" layoutY="26.0" text="Login">
+         <font>
+            <Font size="30.0" />
+         </font>
+      </Label>
+      <Label layoutX="131.0" layoutY="104.0" text="URL">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="131.0" layoutY="155.0" text="Puerto">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="131.0" layoutY="200.0" text="Usuario">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="131.0" layoutY="249.0" text="Contraseña">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
