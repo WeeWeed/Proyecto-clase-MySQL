@@ -403,16 +403,16 @@ public class PrincipalController implements Initializable {
             Connection connection = conector.getConnection();
             if (connection != null) {
                 // Obtener los registros de la tabla
-                List<Map<String, Object>> registros = obtenerRegistros(baseActual2, nombreTabla);
+                List<Map<String, Object>> registros2 = obtenerEstructura(baseActual2, nombreTabla);
 
                 // Crear una lista observable para los registros
-                ObservableList<Map<String, Object>> registrosObservable = FXCollections.observableArrayList(registros);
+                ObservableList<Map<String, Object>> registrosObservable = FXCollections.observableArrayList(registros2);
 
                 // Limpiar las columnas existentes en la tabla
                 tablaRegistros2.getColumns().clear();
 
                 // Crear columnas dinámicamente basadas en los nombres de columna
-                for (String columnName : registros.get(0).keySet()) {
+                for (String columnName : registros2.get(0).keySet()) {
                     TableColumn<Map<String, Object>, Object> column = new TableColumn<>(columnName);
                     column.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().get(columnName)));
                     tablaRegistros2.getColumns().add(column);
@@ -455,6 +455,32 @@ public class PrincipalController implements Initializable {
             throw new SQLException("No se pudo establecer la conexión");
         }
         return registros;
+    }
+    
+        private List<Map<String, Object>> obtenerEstructura(String nombreBaseDatos, String nombreTabla) throws SQLException {
+        List<Map<String, Object>> Estructura = new ArrayList<>();
+        Connection connection = conector.getConnection();
+        if (connection != null) {
+            String query = "DESCRIBE " + nombreBaseDatos + "." + nombreTabla;
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            while (resultSet.next()) {
+                Map<String, Object> registro = new HashMap<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = metaData.getColumnName(i);
+                    Object columnValue = resultSet.getObject(i);
+                    registro.put(columnName, columnValue);
+                }
+                Estructura.add(registro);
+            }
+        } else {
+            throw new SQLException("No se pudo establecer la conexión");
+        }
+        return Estructura;
     }
 
     @FXML
